@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Vercel
+.vercel
+
+# Editor / OS noise
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
