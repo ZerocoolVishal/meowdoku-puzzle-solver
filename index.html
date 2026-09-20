@@ -3,7 +3,42 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Meow Doku Puzzle Solver</title>
+
+<!-- Primary meta -->
+<title>Meowdoku Puzzle Solver — Solve Any Board from a Screenshot</title>
+<meta name="description" content="Upload a screenshot of your Meowdoku puzzle and get the solution instantly. A free solver that reads the colour regions and places every cat — one hint, a few squares ruled out, or the whole grid.">
+<meta name="keywords" content="meowdoku, meowdoku solver, meowdoku puzzle solver, meowdoku answer, meowdoku hint, meowdoku today, cat puzzle solver, queens puzzle solver, colour region puzzle, puzzle solver from screenshot, free online puzzle solver">
+<meta name="author" content="Vishal B">
+<meta name="application-name" content="Meowdoku Solver">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<link rel="canonical" href="https://meowdoku.vishalb.dev/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Meowdoku Solver">
+<meta property="og:title" content="Meowdoku Puzzle Solver — Solve Any Board from a Screenshot">
+<meta property="og:description" content="Drop in a screenshot of your Meowdoku puzzle and get the answer instantly. One hint, a few squares ruled out, or the whole grid solved.">
+<meta property="og:url" content="https://meowdoku.vishalb.dev/">
+<meta property="og:image" content="https://meowdoku.vishalb.dev/og-image.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Meowdoku Puzzle Solver — a solved puzzle board with cats placed on coloured regions.">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Meowdoku Puzzle Solver — Solve Any Board from a Screenshot">
+<meta name="twitter:description" content="Drop in a screenshot of your Meowdoku puzzle and get the answer instantly. One hint, a few squares ruled out, or the whole grid solved.">
+<meta name="twitter:image" content="https://meowdoku.vishalb.dev/og-image.png">
+<meta name="twitter:image:alt" content="Meowdoku Puzzle Solver — a solved puzzle board with cats placed on coloured regions.">
+
+<!-- Icons, theme, manifest -->
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta name="theme-color" content="#F5F0E7">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
@@ -210,7 +245,7 @@ li{margin-bottom:6px}
 <body>
 <div class="wrap">
   <header>
-    <h1>Meow Doku</h1>
+    <h1>Meowdoku</h1>
     <p class="tagline">Puzzle solver</p>
   </header>
 
@@ -729,6 +764,98 @@ function drawOverlay(sol){
   }
 }
 })();
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": "https://meowdoku.vishalb.dev/#app",
+      "name": "Meowdoku Puzzle Solver",
+      "alternateName": "Meowdoku Solver",
+      "url": "https://meowdoku.vishalb.dev/",
+      "description": "Upload a screenshot of a Meowdoku puzzle and get the solution instantly. The solver reads the colour regions from the image and places every cat, giving one hint, a few ruled-out squares, or the whole grid.",
+      "applicationCategory": "GameApplication",
+      "applicationSubCategory": "Puzzle solver",
+      "operatingSystem": "Any (web browser)",
+      "browserRequirements": "Requires JavaScript.",
+      "isAccessibleForFree": true,
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "image": "https://meowdoku.vishalb.dev/og-image.png",
+      "screenshot": "https://meowdoku.vishalb.dev/og-image.png",
+      "featureList": [
+        "Reads the puzzle board straight from a screenshot",
+        "Detects the coloured regions automatically, no cropping needed",
+        "Reveals one cat at a time, rules out squares, or solves the whole board",
+        "Draws the answer back onto your original screenshot",
+        "Lets you correct any square whose colour was read wrong"
+      ],
+      "author": {
+        "@id": "https://vishalb.dev/#person"
+      }
+    },
+    {
+      "@type": "Person",
+      "@id": "https://vishalb.dev/#person",
+      "name": "Vishal B",
+      "url": "https://vishalb.dev",
+      "sameAs": [
+        "https://github.com/ZerocoolVishal"
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://meowdoku.vishalb.dev/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What are the rules of Meowdoku?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "One cat in every row and every column, one cat in every colour region, and no two cats touching — not even corner to corner."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I solve a Meowdoku puzzle from a screenshot?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Take a screenshot of a fresh puzzle with nothing placed on it, then drag it in, paste it, or pick the file. The solver finds the board by looking for the big block of equal-sized coloured squares, so no cropping is needed."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I get just a hint instead of the full answer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. You choose how much help you want: reveal a single cat, rule out a few squares, or solve the whole board at once."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why does my half-solved board give the wrong answer?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Cats and crosses already on the board confuse the colour reading. Clear the board in the app first, then screenshot a fresh puzzle."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is the Meowdoku solver free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes, it is free to use and runs entirely in your browser — your screenshot is never uploaded to a server."
+          }
+        }
+      ]
+    }
+  ]
+}
 </script>
 </body>
 </html>

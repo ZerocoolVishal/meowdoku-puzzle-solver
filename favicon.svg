@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Meowdoku">
+  <rect width="64" height="64" rx="14" fill="#E8942F"/>
+  <g fill="#F5F0E7">
+    <!-- ears tucked behind the head so the joins stay seamless -->
+    <path d="M15 28 L16.5 9 L32 19 Z"/>
+    <path d="M49 28 L47.5 9 L32 19 Z"/>
+    <!-- head -->
+    <path d="M32 16c11 0 18.5 7.6 18.5 18S43 53.5 32 53.5 13.5 44.4 13.5 34 21 16 32 16Z"/>
+  </g>
+  <!-- eyes -->
+  <ellipse cx="24.4" cy="32.5" rx="3.4" ry="4.3" fill="#6E4A2C"/>
+  <ellipse cx="39.6" cy="32.5" rx="3.4" ry="4.3" fill="#6E4A2C"/>
+  <!-- nose -->
+  <path d="M29.9 39.9 h4.2 L32 42.5 Z" fill="#6E4A2C" stroke="#6E4A2C" stroke-width="1.1" stroke-linejoin="round"/>
+  <!-- mouth -->
+  <path d="M32 43.2v1.5M32 44.7c0 2-1.9 2.9-3.6 2.1M32 44.7c0 2 1.9 2.9 3.6 2.1"
+        fill="none" stroke="#6E4A2C" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

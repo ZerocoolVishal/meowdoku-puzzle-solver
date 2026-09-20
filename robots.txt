@@ -1,0 +1,5 @@
+# Meowdoku Puzzle Solver
+User-agent: *
+Allow: /
+
+Sitemap: https://meowdoku.vishalb.dev/sitemap.xml
