@@ -857,5 +857,10 @@ function drawOverlay(sol){
   ]
 }
 </script>
+<!-- Vercel Web Analytics (cookieless). The queue shim buffers events fired
+     before script.js finishes loading; both are same-origin, so the existing
+     script-src 'self' 'unsafe-inline' and connect-src 'self' CSP covers them. -->
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments);};</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>

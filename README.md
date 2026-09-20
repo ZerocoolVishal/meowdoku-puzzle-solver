@@ -63,6 +63,21 @@ the author as a `Person`, and an `FAQPage` mirroring the on-page questions.
 `index.html` (canonical, `og:url`, `og:image`, `twitter:image`, and the
 JSON-LD `@id`/`url`/`image` fields), `robots.txt`, and `sitemap.xml`.
 
+## Analytics
+
+Vercel Web Analytics is wired in at the bottom of `index.html` with the plain
+HTML snippet (the `window.va` queue shim plus `/_vercel/insights/script.js`) —
+there is no build step here, so the npm package is not an option.
+
+Both are same-origin, so the existing CSP covers them with no changes needed.
+It is cookieless and stores no personal data, so it needs no consent banner.
+
+The snippet alone does not collect anything: **Web Analytics must also be
+enabled for the project** under Vercel → the project → Analytics, or with
+`vercel project web-analytics`. Without that, `/_vercel/insights/script.js`
+still serves a script, but the API reports "Web Analytics not found" and no
+data is recorded — an easy thing to misread as working.
+
 ## Deployment
 
 Hosted on Vercel as a static site, connected to this repository. Pushes to
