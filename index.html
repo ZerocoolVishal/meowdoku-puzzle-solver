@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meow Doku Puzzle Solver</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --paper:#F5F0E7;
+  --grid:rgba(255,255,255,.8);
+  --panel:#FFFFFF;
+  --ink:#6E4A2C;
+  --ink-soft:#A8917C;
+  --orange:#E8942F;
+  --blue:#8E98E3;
+  --chip:#6E6259;
+  --chip-warn:#C1553B;
+  --edge:#EDE4D6;
+  --radius:26px;
+  --gap:22px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 3px,transparent 3px),
+    linear-gradient(90deg,var(--grid) 3px,transparent 3px);
+  background-size:clamp(78px,22vw,104px) clamp(78px,22vw,104px);
+  color:var(--ink);
+  font-family:"Nunito","Segoe UI",system-ui,-apple-system,sans-serif;
+  font-size:16px;line-height:1.55;
+  padding:clamp(26px,7vw,46px) clamp(14px,4vw,24px) 72px;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:640px;margin:0 auto}
+
+header{text-align:center;margin:0 0 clamp(26px,6vw,38px)}
+h1{
+  font-family:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  font-weight:800;color:var(--ink);
+  font-size:clamp(36px,11vw,60px);line-height:1;
+  letter-spacing:-.015em;margin:0;
+}
+.tagline{
+  font-family:"Baloo 2",system-ui,sans-serif;font-weight:600;
+  font-size:clamp(17px,4.6vw,22px);color:var(--ink-soft);
+  margin:8px 0 0;
+}
+
+.panel{
+  background:var(--panel);
+  border-radius:var(--radius);
+  padding:clamp(20px,5vw,30px);
+  margin:0 0 var(--gap);
+}
+.panel > * + *{margin-top:18px}
+h2{
+  font-family:"Baloo 2",system-ui,sans-serif;font-weight:700;
+  font-size:clamp(18px,4.8vw,22px);margin:0;color:var(--ink);
+}
+
+.btn{
+  font-family:"Baloo 2",system-ui,sans-serif;font-weight:700;
+  font-size:clamp(16px,4.2vw,19px);
+  border:none;border-radius:999px;
+  padding:13px 26px;color:#fff;cursor:pointer;
+  background:var(--orange);
+  -webkit-appearance:none;appearance:none;
+}
+.btn:active{opacity:.85}
+.btn-blue{background:var(--blue)}
+.btn-ghost{background:var(--paper);color:var(--ink)}
+.btn:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+select.btn{padding-right:22px;text-align:center}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center}
+
+#drop{
+  background:var(--panel);border-radius:var(--radius);
+  padding:clamp(26px,7vw,38px) clamp(18px,4vw,28px);
+  text-align:center;cursor:pointer;margin:0 0 var(--gap);
+}
+#drop.hot{outline:3px dashed var(--orange);outline-offset:-10px}
+#drop:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+#drop b{
+  display:block;font-family:"Baloo 2",system-ui,sans-serif;
+  font-weight:700;font-size:clamp(18px,4.8vw,22px);margin:0 0 6px;
+}
+#drop .hint{display:block;color:var(--ink-soft);font-size:14px;margin:0 0 20px}
+input[type=file]{display:none}
+
+#grid{display:grid;gap:clamp(3px,1.3vw,7px);margin:0 auto;width:100%;max-width:430px}
+.cell{
+  aspect-ratio:1;border-radius:22%;border:none;padding:0;min-width:0;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(13px,4.4vw,28px);cursor:pointer;
+}
+.cell svg{width:62%;height:62%;display:block}
+.btn[disabled]{opacity:.42;cursor:default}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.head h2{margin:0}
+select.mini{
+  font-family:"Baloo 2",system-ui,sans-serif;font-weight:600;font-size:14px;
+  border:none;border-radius:999px;background:var(--paper);color:var(--ink);
+  padding:8px 14px;cursor:pointer;-webkit-appearance:none;appearance:none;
+}
+select.mini:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.actions{display:grid;gap:10px;grid-template-columns:1fr}
+@media (min-width:540px){.actions{grid-template-columns:repeat(3,1fr)}}
+.actions .btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:13px 14px;font-size:16px;
+}
+.actions .btn svg{width:17px;height:17px;flex:0 0 auto}
+.actions .btn .ico{font-size:17px;line-height:1}
+.divide{border:none;border-top:2px solid var(--paper);margin:0}
+.btn.full{width:100%;display:block}
+.btn.small{font-size:14px;padding:9px 16px}
+
+.chip{
+  display:inline-block;background:var(--chip);color:#fff;
+  font-family:"Baloo 2",system-ui,sans-serif;font-weight:600;
+  border-radius:999px;padding:4px 11px;font-size:12px;line-height:1.35;
+}
+.head-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
+.chip-warn{background:var(--chip-warn)}
+.note{color:var(--ink-soft);font-size:14px;margin:0}
+
+.answer{display:flex;flex-wrap:wrap;gap:10px}
+.answer code{
+  font-family:"Baloo 2",system-ui,sans-serif;font-weight:700;font-size:15px;
+  color:#fff;background:var(--orange);
+  border-radius:14px;padding:8px 14px;white-space:nowrap;
+}
+.answer code:nth-child(even){background:var(--blue)}
+
+canvas{max-width:100%;max-height:70vh;width:auto;height:auto;border-radius:18px;display:block;margin:0 auto}
+#shot{overflow:auto}
+
+details.panel > summary{
+  font-family:"Baloo 2",system-ui,sans-serif;font-weight:700;
+  font-size:clamp(17px,4.4vw,20px);cursor:pointer;color:var(--ink);list-style:none;
+}
+details.panel > summary::-webkit-details-marker{display:none}
+details.panel > summary::after{content:" ▾";color:var(--ink-soft)}
+details[open].panel > summary::after{content:" ▴"}
+footer{
+  background:var(--panel);border-radius:var(--radius);
+  padding:clamp(20px,5vw,26px);margin:var(--gap) 0 0;
+  text-align:center;
+  font-family:"Baloo 2",system-ui,sans-serif;
+}
+footer .name{font-weight:700;font-size:clamp(17px,4.4vw,20px);color:var(--ink)}
+footer .links{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:14px}
+footer a{
+  display:inline-flex;align-items:center;gap:8px;
+  font-weight:700;font-size:15px;color:#fff;text-decoration:none;
+  background:var(--orange);border-radius:999px;padding:10px 18px;
+}
+footer a.gh{background:var(--blue)}
+footer a:active{opacity:.85}
+footer a:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+footer svg{width:18px;height:18px;fill:currentColor}
+#help{border-top:2px solid var(--paper);padding-top:20px}
+#help h2{margin-bottom:8px}
+.how{margin:0 0 var(--gap)}
+.how ol{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:14px}
+.how li{display:flex;gap:14px;align-items:flex-start;margin:0}
+.how .step{
+  flex:0 0 auto;width:30px;height:30px;border-radius:50%;
+  background:var(--orange);color:#fff;
+  font-family:"Baloo 2",system-ui,sans-serif;font-weight:700;font-size:16px;
+  display:flex;align-items:center;justify-content:center;line-height:1;
+}
+.how li:nth-child(2) .step{background:var(--blue)}
+.how li:nth-child(3) .step{background:var(--chip)}
+ol{padding-left:22px;margin:16px 0 0}
+li{margin-bottom:6px}
+/* board gate */
+.board-wrap{position:relative}
+#grid.gated{filter:blur(5px);pointer-events:none}
+#gate{
+  position:absolute;inset:-6px;border-radius:20px;
+  background:rgba(255,255,255,.62);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  gap:12px;padding:14px;
+}
+#gate .gate-title{
+  margin:0;font-family:"Baloo 2",system-ui,sans-serif;font-weight:700;
+  font-size:clamp(16px,4.4vw,19px);color:var(--ink);text-align:center;
+}
+#gate .actions{grid-template-columns:1fr;width:100%;max-width:290px;margin:0}
+
+/* spacing */
+.board-wrap{margin-top:20px}
+.panel > p.note{margin-top:12px}
+#help{margin-top:22px}
+#help .actions{margin-top:12px}
+.divide{margin:26px 0 20px}
+.head{margin-bottom:0}
+
+.hidden{display:none !important}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Meow Doku</h1>
+    <p class="tagline">Puzzle solver</p>
+  </header>
+
+  <div id="drop" tabindex="0" role="button" aria-label="Choose a screenshot">
+    <b>Drop in your puzzle screenshot</b>
+    <span class="hint">drag it here, paste it, or pick a file</span>
+    <span class="btn">Choose screenshot</span>
+    <input type="file" id="file" accept="image/*">
+  </div>
+
+  <details class="panel how" id="how" open>
+    <summary>How to use it</summary>
+    <ol>
+      <li><span class="step">1</span><span><b>Screenshot a fresh puzzle.</b> Nothing placed on it yet, no cats and no crosses. A half solved board confuses the colour reading and the answer comes out wrong. If you have already started, clear the board in the app first.</span></li>
+      <li><span class="step">2</span><span><b>Upload it here.</b> Pick the file, drag it in, or paste it.</span></li>
+      <li><span class="step">3</span><span><b>Choose how much help you want.</b> One cat at a time, a few squares ruled out, or the whole thing solved.</span></li>
+    </ol>
+  </details>
+
+  <div id="results" class="hidden">
+    <section class="panel">
+      <div class="head">
+        <div class="head-left">
+          <h2>Your board</h2>
+          <span id="status" class="chip"></span>
+        </div>
+        <select id="size" class="mini" aria-label="Board size">
+          <option value="0">Auto size</option>
+        </select>
+      </div>
+      <div class="board-wrap">
+        <div id="grid" class="gated"></div>
+        <div id="gate">
+          <p class="gate-title">How much help do you want?</p>
+          <div class="actions" id="actions">
+            <button id="catBtn" class="btn"><span class="ico">🐱</span>Show a cat</button>
+            <button id="crossBtn" class="btn btn-blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7L17 17M17 7L7 17" fill="none" stroke="currentColor" stroke-width="4.4" stroke-linecap="round"/></svg>Rule out squares</button>
+            <button id="allBtn" class="btn btn-ghost"><span class="ico">💡</span>Solve it all</button>
+          </div>
+        </div>
+      </div>
+      <p class="note" id="fixNote">Tap a square to cycle it to another colour if one was read wrong.</p>
+      <button id="resetBtn" class="btn btn-ghost small hidden">Undo my colour changes</button>
+
+      <div id="help" class="hidden">
+        <p class="note" id="hintNote"></p>
+      </div>
+
+      <hr class="divide">
+      <button id="again" class="btn btn-ghost full">Start over</button>
+    </section>
+
+    <div id="full" class="hidden">
+      <section class="panel">
+        <h2>The same answer on your screenshot</h2>
+        <button id="shotBtn" class="btn btn-blue" aria-expanded="false" aria-controls="shot">Show screenshot</button>
+        <div id="shot" class="hidden"><canvas id="overlay"></canvas></div>
+      </section>
+    </div>
+  </div>
+
+  <details class="panel" id="rules">
+    <summary>How it solves the board</summary>
+    <ol>
+      <li>One cat in every row and every column.</li>
+      <li>One cat in every colour region.</li>
+      <li>No two cats touching, including corner to corner.</li>
+    </ol>
+    <p class="note" style="margin-top:12px">No cropping needed. The board is found by looking for the big block of equal-sized coloured squares.</p>
+  </details>
+
+  <footer>
+    <div class="name">Made by Vishal B</div>
+    <div class="links">
+    <a href="https://vishalb.dev" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 .5a7.5 7.5 0 1 0 0 15 7.5 7.5 0 0 0 0-15Zm5.2 4.7h-2.06a11.6 11.6 0 0 0-1-2.63A6.04 6.04 0 0 1 13.2 5.2ZM8 2.02c.5.72.98 1.79 1.3 3.18H6.7C7.02 3.81 7.5 2.74 8 2.02ZM1.7 9.5A6.1 6.1 0 0 1 1.5 8c0-.52.07-1.02.2-1.5h2.37a14.8 14.8 0 0 0 0 3H1.7Zm.63 1.3h2.06c.23 1 .56 1.9 1 2.63a6.04 6.04 0 0 1-3.06-2.63Zm2.06-5.6H2.33A6.04 6.04 0 0 1 5.4 2.57c-.45.73-.78 1.63-1.01 2.63ZM8 13.98c-.5-.72-.98-1.79-1.3-3.18h2.6c-.32 1.39-.8 2.46-1.3 3.18Zm1.54-4.48h-3.1a13.4 13.4 0 0 1 0-3h3.1a13.4 13.4 0 0 1 0 3Zm.6 3.93c.45-.73.78-1.63 1.01-2.63h2.06a6.04 6.04 0 0 1-3.06 2.63Zm1.25-3.93a14.8 14.8 0 0 0 0-3h2.37c.13.48.2.98.2 1.5s-.07 1.02-.2 1.5h-2.37Z"/></svg>
+      vishalb.dev
+    </a>
+    <a class="gh" href="https://github.com/ZerocoolVishal" target="_blank" rel="noopener noreferrer">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      github.com/ZerocoolVishal
+    </a>
+    </div>
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const $ = s => document.querySelector(s);
+const dropEl=$("#drop"), fileEl=$("#file"), resEl=$("#results"),
+      gridEl=$("#grid"), statusEl=$("#status"),
+      cv=$("#overlay"), sizeEl=$("#size"), againEl=$("#again"),
+      shotEl=$("#shot"), shotBtn=$("#shotBtn"),
+      helpEl=$("#help"), fullEl=$("#full"), hintNote=$("#hintNote"),
+      gateEl=$("#gate"), actionsEl=$("#actions"), fixNote=$("#fixNote"),
+      howEl=$("#how"), rulesEl=$("#rules"), resetBtn=$("#resetBtn"),
+      catBtn=$("#catBtn"), crossBtn=$("#crossBtn"), allBtn=$("#allBtn");
+
+for(let n=4;n<=12;n++){
+  const o=document.createElement("option"); o.value=n; o.textContent=n+" × "+n; sizeEl.appendChild(o);
+}
+
+let state=null; // {img, board:{N,colorIdx,palette,centers,cell}, sols}
+
+/* ---------- input ---------- */
+dropEl.addEventListener("click",()=>fileEl.click());
+dropEl.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fileEl.click();}});
+fileEl.addEventListener("change",()=>{ if(fileEl.files[0]) load(fileEl.files[0]); });
+["dragenter","dragover"].forEach(t=>dropEl.addEventListener(t,e=>{e.preventDefault();dropEl.classList.add("hot");}));
+["dragleave","drop"].forEach(t=>dropEl.addEventListener(t,e=>{e.preventDefault();dropEl.classList.remove("hot");}));
+dropEl.addEventListener("drop",e=>{const f=e.dataTransfer.files[0]; if(f) load(f);});
+window.addEventListener("paste",e=>{
+  const items=e.clipboardData && e.clipboardData.files;
+  if(items && items[0] && items[0].type.startsWith("image/")) load(items[0]);
+});
+sizeEl.addEventListener("change",()=>{ if(state) run(state.img, +sizeEl.value); });
+function toggler(btn,panel,showText,hideText){
+  btn.addEventListener("click",()=>{
+    const open=panel.classList.toggle("hidden")===false;
+    btn.textContent=open?hideText:showText;
+    btn.setAttribute("aria-expanded",String(open));
+  });
+}
+toggler(shotBtn,shotEl,"Show screenshot","Hide screenshot");
+function collapseAll(){
+  shotEl.classList.add("hidden"); shotBtn.textContent="Show screenshot"; shotBtn.setAttribute("aria-expanded","false");
+}
+againEl.addEventListener("click",()=>{ resEl.classList.add("hidden"); fileEl.value=""; state=null; collapseAll(); fullEl.classList.add("hidden"); window.scrollTo({top:0,behavior:"smooth"}); });
+
+function load(file){
+  const fr=new FileReader();
+  fr.onload=()=>{
+    const img=new Image();
+    img.onload=()=>run(img,+sizeEl.value);
+    img.onerror=()=>fail("That file didn't open as an image. Try a PNG or JPG screenshot.");
+    img.src=fr.result;
+  };
+  fr.onerror=()=>fail("The file couldn't be read. Try picking it again.");
+  fr.readAsDataURL(file);
+}
+
+function setGate(on){
+  if(on){
+    gridEl.classList.add("gated");
+    gateEl.classList.remove("hidden");
+    gateEl.appendChild(actionsEl);
+    actionsEl.classList.remove("hidden");
+    helpEl.classList.add("hidden");
+    fixNote.classList.add("hidden");
+  }else{
+    gridEl.classList.remove("gated");
+    gateEl.classList.add("hidden");
+    helpEl.classList.remove("hidden");
+    fixNote.classList.remove("hidden");
+    helpEl.appendChild(actionsEl);
+  }
+}
+
+function focusBoard(){
+  const card=gridEl.closest("section");
+  if(!card) return;
+  const r=card.getBoundingClientRect();
+  const top=window.scrollY+r.top;
+  const gap=r.height<window.innerHeight-40 ? (window.innerHeight-r.height)/2 : 20;
+  window.scrollTo({top:Math.max(0,top-gap),behavior:"smooth"});
+}
+
+function chose(){
+  if(state.chosen) return;
+  state.chosen=true;
+  setGate(false);
+}
+
+function fail(msg){
+  resEl.classList.remove("hidden");
+  statusEl.className="chip chip-warn"; statusEl.textContent=msg;
+  helpEl.classList.add("hidden"); fullEl.classList.add("hidden");
+  gateEl.classList.add("hidden"); gridEl.classList.remove("gated"); fixNote.classList.add("hidden");
+  resetBtn.classList.add("hidden");
+  gridEl.innerHTML="";
+  cv.width=cv.height=0;
+}
+
+/* ---------- pixels ---------- */
+function pixels(img){
+  const maxDim=1400;
+  const sc=Math.min(1,maxDim/Math.max(img.naturalWidth,img.naturalHeight));
+  const W=Math.max(1,Math.round(img.naturalWidth*sc)), H=Math.max(1,Math.round(img.naturalHeight*sc));
+  const c=document.createElement("canvas"); c.width=W; c.height=H;
+  const x=c.getContext("2d",{willReadFrequently:true});
+  x.drawImage(img,0,0,W,H);
+  return {data:x.getImageData(0,0,W,H).data,W,H};
+}
+
+/* find blobs of coloured pixels */
+function blobsOf(px){
+  const {data,W,H}=px, n=W*H;
+  const mask=new Uint8Array(n);
+  for(let p=0,i=0;p<n;p++,i+=4){
+    const r=data[i],g=data[i+1],b=data[i+2];
+    const mx=r>g?(r>b?r:b):(g>b?g:b), mn=r<g?(r<b?r:b):(g<b?g:b);
+    if(mx-mn>=28 && mx>=45) mask[p]=1;
+  }
+  const seen=new Uint8Array(n), stack=new Int32Array(n), out=[];
+  for(let p=0;p<n;p++){
+    if(!mask[p]||seen[p]) continue;
+    let sp=0; stack[sp++]=p; seen[p]=1;
+    let area=0,minx=W,maxx=0,miny=H,maxy=0;
+    while(sp>0){
+      const q=stack[--sp], qx=q%W, qy=(q/W)|0;
+      area++;
+      if(qx<minx)minx=qx; if(qx>maxx)maxx=qx;
+      if(qy<miny)miny=qy; if(qy>maxy)maxy=qy;
+      if(qx>0){const t=q-1; if(mask[t]&&!seen[t]){seen[t]=1;stack[sp++]=t;}}
+      if(qx<W-1){const t=q+1; if(mask[t]&&!seen[t]){seen[t]=1;stack[sp++]=t;}}
+      if(qy>0){const t=q-W; if(mask[t]&&!seen[t]){seen[t]=1;stack[sp++]=t;}}
+      if(qy<H-1){const t=q+W; if(mask[t]&&!seen[t]){seen[t]=1;stack[sp++]=t;}}
+    }
+    const w=maxx-minx+1, h=maxy-miny+1;
+    if(area<120||w<10||h<10) continue;
+    const fill=area/(w*h), ar=w/h;
+    if(fill<0.62||ar<0.68||ar>1.45) continue;
+    out.push({area,minx,maxx,miny,maxy,w,h,cx:(minx+maxx)/2,cy:(miny+maxy)/2,s:(w+h)/2});
+  }
+  return out;
+}
+
+/* pick the family of same-sized squares with the most painted area, then keep the cluster that sits together */
+function pickBoard(bl){
+  if(bl.length<9) return null;
+  let best=null;
+  for(const a of bl){
+    const lo=a.s*0.75, hi=a.s*1.33;
+    let sum=0, set=[];
+    for(const b of bl) if(b.s>=lo&&b.s<=hi){ sum+=b.area; set.push(b); }
+    if(set.length>=9 && (!best||sum>best.sum)) best={sum,set};
+  }
+  if(!best) return null;
+  const set=best.set;
+  const sizes=set.map(b=>b.s).sort((x,y)=>x-y);
+  const m=sizes[sizes.length>>1];
+  // union neighbouring squares
+  const par=set.map((_,i)=>i);
+  const find=x=>{while(par[x]!==x){par[x]=par[par[x]];x=par[x];}return x;};
+  for(let i=0;i<set.length;i++)for(let j=i+1;j<set.length;j++){
+    if(Math.abs(set[i].cx-set[j].cx)<2.2*m && Math.abs(set[i].cy-set[j].cy)<2.2*m){
+      const a=find(i),b=find(j); if(a!==b) par[a]=b;
+    }
+  }
+  const groups=new Map();
+  set.forEach((b,i)=>{const r=find(i); if(!groups.has(r))groups.set(r,[]); groups.get(r).push(b);});
+  let cells=null;
+  for(const g of groups.values()) if(!cells||g.length>cells.length) cells=g;
+  if(!cells||cells.length<9) return null;
+  return {cells,m};
+}
+
+function cluster1D(vals,tol){
+  const s=[...vals].sort((a,b)=>a-b), gs=[[s[0]]];
+  for(let i=1;i<s.length;i++){
+    const cur=gs[gs.length-1];
+    if(s[i]-cur[cur.length-1]>tol) gs.push([s[i]]); else cur.push(s[i]);
+  }
+  return gs.map(g=>g.reduce((a,b)=>a+b,0)/g.length);
+}
+
+function sampleColor(px,cx,cy,rad){
+  const {data,W,H}=px, R=[],G=[],B=[];
+  const step=Math.max(1,Math.round(rad/6));
+  for(let y=Math.round(cy-rad);y<=cy+rad;y+=step){
+    if(y<0||y>=H) continue;
+    for(let x=Math.round(cx-rad);x<=cx+rad;x+=step){
+      if(x<0||x>=W) continue;
+      const i=(y*W+x)*4; R.push(data[i]); G.push(data[i+1]); B.push(data[i+2]);
+    }
+  }
+  if(!R.length) return [0,0,0];
+  const med=a=>{a.sort((x,y)=>x-y);return a[a.length>>1];};
+  return [med(R),med(G),med(B)];
+}
+
+const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+
+function groupColors(list,N){
+  const n=list.length, exact=[];
+  let fallback=null;
+  for(let t=10;t<=170;t+=2){
+    const par=[...Array(n).keys()];
+    const find=x=>{while(par[x]!==x){par[x]=par[par[x]];x=par[x];}return x;};
+    for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+      if(dist(list[i],list[j])<t){const a=find(i),b=find(j); if(a!==b)par[a]=b;}
+    }
+    const roots=new Set(); for(let i=0;i<n;i++) roots.add(find(i));
+    const c=roots.size;
+    if(c===N) exact.push(t);
+    const err=Math.abs(c-N);
+    if(!fallback||err<fallback.err) fallback={err,t};
+  }
+  const t = exact.length ? exact[Math.floor(exact.length/2)] : fallback.t;
+  const par=[...Array(n).keys()];
+  const find=x=>{while(par[x]!==x){par[x]=par[par[x]];x=par[x];}return x;};
+  for(let i=0;i<n;i++)for(let j=i+1;j<n;j++){
+    if(dist(list[i],list[j])<t){const a=find(i),b=find(j); if(a!==b)par[a]=b;}
+  }
+  const map=new Map(), sums=[];
+  const idx=list.map((c,i)=>{
+    const r=find(i);
+    if(!map.has(r)){ map.set(r,sums.length); sums.push([0,0,0,0]); }
+    const k=map.get(r), s=sums[k];
+    s[0]+=c[0]; s[1]+=c[1]; s[2]+=c[2]; s[3]++;
+    return k;
+  });
+  const palette=sums.map(s=>[Math.round(s[0]/s[3]),Math.round(s[1]/s[3]),Math.round(s[2]/s[3])]);
+  return {idx,palette};
+}
+
+/* ---------- read the board out of the screenshot ---------- */
+function readBoard(px,forceN){
+  const board=pickBoard(blobsOf(px));
+  if(!board) return null;
+  const {cells,m}=board;
+  let minx=1e9,maxx=-1e9,miny=1e9,maxy=-1e9;
+  for(const b of cells){ minx=Math.min(minx,b.minx); maxx=Math.max(maxx,b.maxx); miny=Math.min(miny,b.miny); maxy=Math.max(maxy,b.maxy); }
+  const rows=cluster1D(cells.map(b=>b.cy),m*0.55);
+  const cols=cluster1D(cells.map(b=>b.cx),m*0.55);
+  let N = forceN || (rows.length===cols.length ? rows.length : Math.max(rows.length,cols.length));
+  if(N<4||N>14) return null;
+
+  const useClusters = !forceN && rows.length===N && cols.length===N;
+  const ys = useClusters ? rows : Array.from({length:N},(_,i)=>miny+((maxy-miny+1)/N)*(i+0.5));
+  const xs = useClusters ? cols : Array.from({length:N},(_,j)=>minx+((maxx-minx+1)/N)*(j+0.5));
+  const cell = useClusters ? m : (maxx-minx+1)/N*0.88;
+
+  const flat=[], centers=[];
+  for(let i=0;i<N;i++){
+    centers.push([]);
+    for(let j=0;j<N;j++){
+      centers[i].push({x:xs[j],y:ys[i]});
+      flat.push(sampleColor(px,xs[j],ys[i],cell*0.28));
+    }
+  }
+  const {idx,palette}=groupColors(flat,N);
+  const colorIdx=[];
+  for(let i=0;i<N;i++) colorIdx.push(idx.slice(i*N,(i+1)*N));
+  return {N,colorIdx,palette,centers,cell};
+}
+
+/* ---------- solver ---------- */
+function solve(colorIdx,N,limit){
+  const sols=[], usedCol=new Array(N).fill(false), usedCat=new Map(), cur=[];
+  function rec(r,prev){
+    if(r===N){ sols.push(cur.slice()); return sols.length>=limit; }
+    for(let c=0;c<N;c++){
+      if(usedCol[c]) continue;
+      if(prev>=0 && Math.abs(c-prev)<2) continue;
+      const g=colorIdx[r][c];
+      if(usedCat.get(g)) continue;
+      usedCol[c]=true; usedCat.set(g,true); cur.push(c);
+      if(rec(r+1,c)) return true;
+      cur.pop(); usedCol[c]=false; usedCat.set(g,false);
+    }
+    return false;
+  }
+  rec(0,-99);
+  return sols;
+}
+
+/* ---------- output ---------- */
+function run(img,forceN){
+  resEl.classList.remove("hidden");
+  const px=pixels(img);
+  const board=readBoard(px,forceN||0);
+  if(!board){ fail("No board found in that image. Make sure the whole coloured grid is visible, then try again."); return; }
+  board.original=board.colorIdx.map(r=>r.slice());
+  state={img,px,board,sol:null,cats:new Set(),crosses:new Set(),full:false,chosen:false,edited:false};
+  fullEl.classList.add("hidden");
+  collapseAll();
+  setGate(true);
+  howEl.open=false;
+  rulesEl.parentNode.insertBefore(howEl,rulesEl);
+  render();
+  resEl.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+function render(){
+  const {board}=state;
+  const N=board.N;
+  const sols=solve(board.colorIdx,N,2);
+  const colours=new Set(board.colorIdx.flat()).size;
+  state.sol=sols[0]||null;
+
+  if(sols.length){
+    statusEl.textContent = `${N}\u00d7${N}, ${colours} colours`+(sols.length>1?", several answers fit":"");
+    statusEl.className="chip";
+  }else{
+    statusEl.className="chip chip-warn";
+    statusEl.innerHTML='Nothing fits this board. It read as a '+N+'\u00d7'+N+' board with '+colours+
+      ' colours'+(colours!==N?' (it should be '+N+')':'')+'. Fix any wrong squares below, or set the board size by hand.';
+    gridEl.classList.remove("gated");
+    gateEl.classList.add("hidden");
+    fixNote.classList.remove("hidden");
+    helpEl.classList.add("hidden");
+    fullEl.classList.add("hidden");
+  }
+  drawGrid();
+  drawOverlay(state.sol);
+  updateHints();
+  resetBtn.classList.toggle("hidden",!state.edited);
+}
+
+function updateHints(){
+  const N=state.board.N, sol=state.sol;
+  if(!sol) return;
+  actionsEl.classList.toggle("hidden",state.full);
+  helpEl.classList.toggle("hidden",state.full||!state.chosen);
+  fixNote.classList.toggle("hidden",state.full||!state.chosen);
+  const found=state.full?N:state.cats.size;
+  const spotsLeft=N*N-N-state.crosses.size;
+  catBtn.disabled=state.full||found>=N;
+  crossBtn.disabled=state.full||spotsLeft<=0;
+  allBtn.disabled=state.full;
+  hintNote.textContent = state.full
+    ? ""
+    : found
+      ? found+" of "+N+" cats found. Keep going, or rule out a few more squares."
+      : "One cat at a time, a handful of squares ruled out, or the lot. Your call.";
+}
+
+resetBtn.addEventListener("click",()=>{
+  if(!state) return;
+  state.board.colorIdx=state.board.original.map(r=>r.slice());
+  state.edited=false;
+  state.cats=new Set(); state.crosses=new Set(); state.full=false;
+  fullEl.classList.add("hidden");
+  render();
+});
+
+catBtn.addEventListener("click",()=>{
+  if(!state||!state.sol||state.full) return;
+  const left=[];
+  for(let r=0;r<state.board.N;r++) if(!state.cats.has(r)) left.push(r);
+  if(!left.length) return;
+  state.cats.add(left[Math.floor(Math.random()*left.length)]);
+  chose(); drawGrid(); updateHints();
+});
+
+crossBtn.addEventListener("click",()=>{
+  if(!state||!state.sol||state.full) return;
+  const N=state.board.N, cand=[];
+  for(let i=0;i<N;i++)for(let j=0;j<N;j++){
+    if(state.sol[i]===j) continue;
+    const key=i+","+j;
+    if(!state.crosses.has(key)) cand.push(key);
+  }
+  for(let n=0;n<5&&cand.length;n++){
+    state.crosses.add(cand.splice(Math.floor(Math.random()*cand.length),1)[0]);
+  }
+  chose(); drawGrid(); updateHints();
+});
+
+allBtn.addEventListener("click",()=>{
+  if(!state||!state.sol) return;
+  state.full=true;
+  chose();
+  fullEl.classList.remove("hidden");
+  drawGrid(); updateHints();
+  focusBoard();
+});
+
+const XMARK='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7L17 17M17 7L7 17" fill="none" stroke="#fff" stroke-width="4.6" stroke-linecap="round"/></svg>';
+
+function drawGrid(){
+  const {board,sol}=state, N=board.N;
+  gridEl.style.gridTemplateColumns=`repeat(${N},1fr)`;
+  gridEl.innerHTML="";
+  for(let i=0;i<N;i++)for(let j=0;j<N;j++){
+    const k=board.colorIdx[i][j], c=board.palette[k];
+    const isCat = !!sol && (state.full||state.cats.has(i)) && sol[i]===j;
+    const isCross = !isCat && !!sol && (state.full || state.crosses.has(i+","+j));
+    const b=document.createElement("button");
+    b.className="cell"+(isCat?" sol":"");
+    b.style.background=`rgb(${c[0]},${c[1]},${c[2]})`;
+    if(isCat) b.textContent="\ud83d\udc31";
+    else if(isCross) b.innerHTML=XMARK;
+    b.title=`row ${i+1}, column ${j+1}`;
+    b.addEventListener("click",()=>{
+      board.colorIdx[i][j]=(board.colorIdx[i][j]+1)%board.palette.length;
+      state.edited=true;
+      state.cats=new Set(); state.crosses=new Set(); state.full=false;
+      fullEl.classList.add("hidden");
+      render();
+    });
+    gridEl.appendChild(b);
+  }
+}
+
+function drawOverlay(sol){
+  const {img,board}=state;
+  const W=Math.min(1400,img.naturalWidth), sc=W/img.naturalWidth, H=Math.round(img.naturalHeight*sc);
+  cv.width=W; cv.height=H;
+  const x=cv.getContext("2d");
+  x.drawImage(img,0,0,W,H);
+  if(!sol) return;
+  const k=W/state.px.W;                 // analysis pixels → canvas pixels
+  const r=board.cell*k*0.36;
+  x.textAlign="center"; x.textBaseline="middle";
+  x.font=`${Math.round(r*1.5)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",system-ui,sans-serif`;
+  for(let i=0;i<board.N;i++){
+    const p=board.centers[i][sol[i]], cx=p.x*k, cy=p.y*k;
+    x.beginPath(); x.arc(cx,cy,r,0,Math.PI*2);
+    x.fillStyle="rgba(255,255,255,.92)"; x.fill();
+    x.lineWidth=Math.max(2,r*0.12); x.strokeStyle="rgba(51,37,49,.85)"; x.stroke();
+    x.fillStyle="#000"; x.fillText("🐱",cx,cy+r*0.04);
+  }
+}
+})();
+</script>
+</body>
+</html>
