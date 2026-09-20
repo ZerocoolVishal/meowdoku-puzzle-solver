@@ -1,0 +1,25 @@
+{
+  "name": "meowdoku-puzzle-solver",
+  "version": "1.0.0",
+  "description": "Meowdoku Puzzle Solver - Solve Any Board from a Screenshot",
+  "type": "module",
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node build.js && npx serve .",
+    "lint": "echo 'No linter configured'",
+    "test": "echo 'No tests configured'"
+  },
+  "keywords": [
+    "meowdoku",
+    "puzzle",
+    "solver"
+  ],
+  "author": "Vishal B",
+  "license": "MIT",
+  "dependencies": {
+    "@vercel/analytics": "^1.1.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.19.8"
+  }
+}
